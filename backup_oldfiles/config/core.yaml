@@ -1,0 +1,3 @@
+peer.validator.consensus: pbft
+
+peer.id: vp0, vp1
