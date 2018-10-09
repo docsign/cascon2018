@@ -18,7 +18,7 @@ Code Repository of Document Signing Blockchain App for IBM CASCON 2018
 
 1. Get artifacts
 
-'''makefile
+'''shell
 export FABRIC_CFG_PATH=$PWD
 ./bin/configtxgen -profile TwoOrgsOrdererGenesis -channelID byfn-sys-channel -outputBlock ./channel-artifacts/genesis.block
 '''
