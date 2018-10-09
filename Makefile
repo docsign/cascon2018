@@ -27,7 +27,7 @@ setenv:
 	export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/mainorg.docsign.com/peers/peer0.mainorg.docsign.com/tls/ca.crt
 
 createchannel:
-	# export CHANNEL_NAME=signchannel
+	export CHANNEL_NAME=signchannel
 	peer channel create -o orderer.docsign.com:7050 -c $(CHANNEL_NAME) -f ./channel-artifacts/channel.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/docsign.com/orderers/orderer.docsign.com/msp/tlscacerts/tlsca.docsign.com-cert.pem
 	peer channel join -b signchannel.block
 	# CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.docsign.com/users/Admin@org2.docsign.com/msp CORE_PEER_ADDRESS=peer0.org2.docsign.com:7051 CORE_PEER_LOCALMSPID="Org2MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.docsign.com/peers/peer0.org2.docsign.com/tls/ca.crt peer channel join -b signchannel.block
