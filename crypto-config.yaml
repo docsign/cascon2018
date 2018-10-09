@@ -11,7 +11,7 @@ OrdererOrgs:
   # Orderer
   # ---------------------------------------------------------------------------
   - Name: Orderer
-    Domain: example.com
+    Domain: docsign.com
     # ---------------------------------------------------------------------------
     # "Specs" - See PeerOrgs below for complete description
     # ---------------------------------------------------------------------------
@@ -22,10 +22,10 @@ OrdererOrgs:
 # ---------------------------------------------------------------------------
 PeerOrgs:
   # ---------------------------------------------------------------------------
-  # Org1
+  # MainOrg
   # ---------------------------------------------------------------------------
-  - Name: Org1
-    Domain: org1.example.com
+  - Name: MainOrg
+    Domain: mainorg.docsign.com
     EnableNodeOUs: true
     # ---------------------------------------------------------------------------
     # "Specs"
@@ -72,12 +72,12 @@ PeerOrgs:
     Users:
       Count: 1
   # ---------------------------------------------------------------------------
-  # Org2: See "Org1" for full specification
+  # Org2: See "MainOrg" for full specification
   # ---------------------------------------------------------------------------
-  - Name: Org2
-    Domain: org2.example.com
-    EnableNodeOUs: true
-    Template:
-      Count: 2
-    Users:
-      Count: 1
+  # - Name: Org2
+  #   Domain: org2.example.com
+  #   EnableNodeOUs: true
+  #   Template:
+  #     Count: 2
+  #   Users:
+  #     Count: 1
