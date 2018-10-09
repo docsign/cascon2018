@@ -1,6 +1,6 @@
 # Makefile for setting up the network
 
-.PHONY setnet prepare setenv createchannel
+.PHONY: setnet prepare setenv createchannel
 
 setnet: prepare runnet createchannel
 
