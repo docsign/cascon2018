@@ -21,6 +21,26 @@ docker exec -it cli bash
 
 I suggest you read (https://hyperledger-fabric.readthedocs.io/en/latest/write_first_app.html) and (https://hyperledger-fabric.readthedocs.io/en/latest/developing_applications.html) and (https://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html) for the chaincode development~
 
+### Chaincode Development
+
+#### From sample
+
+##### Preparation
+
+```bash
+# Kill any stale or active containers
+docker rm -f $(docker ps -aq)
+
+# Clear any cached networks
+docker network prune
+
+# Delete fabcar image
+docker rmi dev-peer0.org1.example.com-fabcar-1.0-5c906e402ed29f20260ae42283216aa75549c571e2e380f3615826365d8269ba
+
+# Start the network
+./startFabric.sh node
+```
+
 ### Network Architecture
 
 ### Steps to run the network
