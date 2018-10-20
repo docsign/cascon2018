@@ -1,20 +1,21 @@
 # Makefile for setting up the network
 
-#export FABRIC_CFG_PATH = $(PWD)
-#export CHANNEL_NAME = signchannel
+export FABRIC_CFG_PATH=$(PWD)
+export CHANNEL_NAME=signchannel
 
 .PHONY: setnet prepare setenv createchannel shutdown
 
 setnet: prepare runnet createchannel
 
 shutdown:
-	old_docker := $(docker ps -aq)
-	docker rm -f $(old_docker) #$(docker ps -aq)
-	docker network prune
+	#export FABRIC_CFG_PATH=hahaha
+	#old_docker := $(docker ps -aq)
+	#docker rm -f $(old_docker) #$(docker ps -aq)
+	#docker network prune
 
 prepare:
 	./bin/cryptogen generate --config=./crypto-config.yaml
-	export FABRIC_CFG_PATH = $(PWD)
+	#export FABRIC_CFG_PATH = $(PWD)
 	./bin/configtxgen -profile OneOrgOrdererGenesis -channelID docsign-sys-channel -outputBlock ./channel-artifacts/genesis.block
 	export CHANNEL_NAME=signchannel && ./bin/configtxgen -profile SignChannel -outputCreateChannelTx ./channel-artifacts/channel.tx -channelID $(CHANNEL_NAME)
 	./bin/configtxgen -profile SignChannel -outputAnchorPeersUpdate ./channel-artifacts/MainOrgMSPanchors.tx -channelID $(CHANNEL_NAME) -asOrg MainOrgMSP
