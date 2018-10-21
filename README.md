@@ -8,7 +8,7 @@ Step-by-step network setup instructions available. I suggest you to try those st
 
 Chaincode available (docsign.js) in cascon2018/chaincode folder. The chaincode can be installed & instantiated to the docsign chain. But I didn't test all the functionalities.
 
-Please start from testing the chaincode (node.js).
+Please start from testing the chaincode (node.js)!
 
 Let me know if you have any question! Thanks!
 
@@ -19,10 +19,17 @@ backup_oldfiles, saved, saved2 - not useful, don't need to touch
 
 sample, fabric-sample - samples from fabric, can be used as reference. fabric-sample is up-to-date
 
-base, chaincode, configtx.yaml, crypto-config.yaml, docker-compose-cli.yaml - useful files
+base, chaincode, configtx.yaml, crypto-config.yaml, docker-compose-cli.yaml and .env - useful files
+
 docker-compose-cli.yaml is the entry point for starting the network
+
 base, configtx.yaml, crypto-config.yaml define the structure of the network
+
 chaincode contains the developed chaincode
+
+.env sets the enviroment, don't need to worry
+
+The Makefile is not working - need to manually start the network
 
 ## Set Up Network & Network Architecture
 
