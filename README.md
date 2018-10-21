@@ -5,10 +5,24 @@ Code Repository of Document Signing Blockchain App for IBM CASCON 2018
 ## Current status
 
 Step-by-step network setup instructions available. I suggest you to try those steps first in order to know the network is running.
+
 Chaincode available (docsign.js) in cascon2018/chaincode folder. The chaincode can be installed & instantiated to the docsign chain. But I didn't test all the functionalities.
+
 Please start from testing the chaincode (node.js).
 
 Let me know if you have any question! Thanks!
+
+## File structure
+cascon2018 - main repo
+
+backup_oldfiles, saved, saved2 - not useful, don't need to touch
+
+sample, fabric-sample - samples from fabric, can be used as reference. fabric-sample is up-to-date
+
+base, chaincode, configtx.yaml, crypto-config.yaml, docker-compose-cli.yaml - useful files
+docker-compose-cli.yaml is the entry point for starting the network
+base, configtx.yaml, crypto-config.yaml define the structure of the network
+chaincode contains the developed chaincode
 
 ## Set Up Network & Network Architecture
 
@@ -29,10 +43,7 @@ docker exec -it cli bash
 
 I suggest you read (https://hyperledger-fabric.readthedocs.io/en/latest/write_first_app.html) and (https://hyperledger-fabric.readthedocs.io/en/latest/developing_applications.html) and (https://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html) for the chaincode development~
 
-
-### Network Architecture
-
-### Steps to run the network
+### Steps to run the network from scratch
 
 #### Run the following commands one by one will create a new network from scratch (Tested and Working!) (Please follow the steps and try!)
 
@@ -45,6 +56,7 @@ docker network prune
 rm -rf crypto-config
 cd channel-artifacts && rm -rf *
 cd ..
+
 # If want to delete old chaincode image (for reinstalling chaincode), try "docker image ls" to see which image is still there and delete them, ex:
 docker image ls
 docker rmi dev-peer0.mainorg.docsign.com-mycc-1.0-712d857ef2a30f72816248be4a87f16f15c271ca967246fcda0eee3c1e11b15f
