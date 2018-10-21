@@ -35,9 +35,9 @@ createchannel:
 	# CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.docsign.com/users/Admin@org2.docsign.com/msp CORE_PEER_ADDRESS=peer0.org2.docsign.com:7051 CORE_PEER_LOCALMSPID="Org2MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.docsign.com/peers/peer0.org2.docsign.com/tls/ca.crt peer channel update -o orderer.docsign.com:7050 -c $(CHANNEL_NAME) -f ./channel-artifacts/Org2MSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/docsign.com/orderers/orderer.docsign.com/msp/tlscacerts/tlsca.docsign.com-cert.pem
 
 chaincode:
-	# byfn version: peer chaincode install -n mycc -v 1.0 -l node -p /opt/gopath/src/github.com/chaincode/chaincode_example02/node/
+	peer chaincode install -n mycc -v 1.0 -l node -p /opt/gopath/src/github.com/chaincode/chaincode_example02/node/
 	peer chaincode instantiate -o orderer.docsign.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/docsign.com/orderers/orderer.docsign.com/msp/tlscacerts/tlsca.docsign.com-cert.pem -C $CHANNEL_NAME -n mycc -l node -v 1.0 -c '{"Args":["init","a", "100", "b","200"]}' -P "AND ('MainOrgMSP.peer')"
 	peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}'
-	
+
 # docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH -f $COMPOSE_FILE_ORG3 down --volumes --remove-orphans
 # docker-compose -f docker-compose-cli.yaml down --volumes --remove-orphans

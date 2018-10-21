@@ -45,6 +45,61 @@ docker rmi dev-peer0.org1.example.com-fabcar-1.0-5c906e402ed29f20260ae42283216aa
 
 ### Steps to run the network
 
+#### Run the following commands one by one will create a new network from scratch
+
+```bash
+# Clean up all old files/containers
+cd cascon2018
+docker-compose -f docker-compose-cli.yaml down --volumes --remove-orphans
+docker rm -f $(docker ps -aq)
+rm -rf crypto-config
+cd channel-artifacts && rm -rf *
+cd ..
+
+# Create the crypto keys & network artifacts
+export FABRIC_CFG_PATH=$PWD
+export CHANNEL_NAME=signchannel
+./bin/cryptogen generate --config=./crypto-config.yaml
+./bin/configtxgen -profile OneOrgOrdererGenesis -channelID docsign-sys-channel -outputBlock ./channel-artifacts/genesis.block
+export CHANNEL_NAME=signchannel && ./bin/configtxgen -profile SignChannel -outputCreateChannelTx ./channel-artifacts/channel.tx -channelID $CHANNEL_NAME
+./bin/configtxgen -profile SignChannel -outputAnchorPeersUpdate ./channel-artifacts/MainOrgMSPanchors.tx -channelID $CHANNEL_NAME -asOrg MainOrgMSP
+
+# Setup some env variables
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/mainorg.docsign.com/users/Admin@mainorg.docsign.com/msp
+export CORE_PEER_ADDRESS=peer0.mainorg.docsign.com:7051
+export CORE_PEER_LOCALMSPID="MainOrgMSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/mainorg.docsign.com/peers/peer0.mainorg.docsign.com/tls/ca.crt
+
+# Run the network
+docker-compose -f docker-compose-cli.yaml up
+
+# Open another terminal to enter cli
+export FABRIC_CFG_PATH=$PWD
+docker exec -it cli bash
+
+# Use the second terminal (cli) to create channel
+export CHANNEL_NAME=signchannel
+peer channel create -o orderer.docsign.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/docsign.com/orderers/orderer.docsign.com/msp/tlscacerts/tlsca.docsign.com-cert.pem
+peer channel join -b signchannel.block
+peer channel update -o orderer.docsign.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/MainOrgMSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/docsign.com/orderers/orderer.docsign.com/msp/tlscacerts/tlsca.docsign.com-cert.pem
+
+# Install chaincode
+peer chaincode install -n mycc -v 1.0 -l node -p /opt/gopath/src/github.com/chaincode/chaincode_example02/node/
+peer chaincode instantiate -o orderer.docsign.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/docsign.com/orderers/orderer.docsign.com/msp/tlscacerts/tlsca.docsign.com-cert.pem -C $CHANNEL_NAME -n mycc -l node -v 1.0 -c '{"Args":["init","a", "100", "b","200"]}' -P "AND ('MainOrgMSP.peer')"
+peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}'
+
+# To stop the network
+ctrl+c in the first terminal running the network
+
+# If want to restart - need to delete containers & files
+docker-compose -f docker-compose-cli.yaml down --volumes --remove-orphans
+docker rm -f $(docker ps -aq)
+rm -rf crypto-config
+cd channel-artifacts && rm -rf *
+cd ..
+```
+
+
 #### Generate crypto materials
 
 ```bash
