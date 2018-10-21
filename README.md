@@ -2,9 +2,17 @@
 
 Code Repository of Document Signing Blockchain App for IBM CASCON 2018
 
+## Current status
+
+Step-by-step network setup instructions available. I suggest you to try those steps first in order to know the network is running.
+Chaincode available (docsign.js) in cascon2018/chaincode folder. The chaincode can be installed & instantiated to the docsign chain. But I didn't test all the functionalities.
+Please start from testing the chaincode (node.js).
+
+Let me know if you have any question! Thanks!
+
 ## Set Up Network & Network Architecture
 
-To start the network (docsign):
+To start the network (docsign) when you just ctrl+c last time to exit the network (i.e. you didn't remove the containers and not from scratch):
 
 ```bash
 Go to cascon2018
@@ -21,40 +29,25 @@ docker exec -it cli bash
 
 I suggest you read (https://hyperledger-fabric.readthedocs.io/en/latest/write_first_app.html) and (https://hyperledger-fabric.readthedocs.io/en/latest/developing_applications.html) and (https://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html) for the chaincode development~
 
-### Chaincode Development
-
-#### From sample
-
-##### Preparation
-
-```bash
-# Kill any stale or active containers
-docker rm -f $(docker ps -aq)
-
-# Clear any cached networks
-docker network prune
-
-# Delete fabcar image
-docker rmi dev-peer0.org1.example.com-fabcar-1.0-5c906e402ed29f20260ae42283216aa75549c571e2e380f3615826365d8269ba
-
-# Start the network
-./startFabric.sh node
-```
 
 ### Network Architecture
 
 ### Steps to run the network
 
-#### Run the following commands one by one will create a new network from scratch
+#### Run the following commands one by one will create a new network from scratch (Tested and Working!) (Please follow the steps and try!)
 
 ```bash
 # Clean up all old files/containers
 cd cascon2018
 docker-compose -f docker-compose-cli.yaml down --volumes --remove-orphans
 docker rm -f $(docker ps -aq)
+docker network prune
 rm -rf crypto-config
 cd channel-artifacts && rm -rf *
 cd ..
+# If want to delete old chaincode image (for reinstalling chaincode), try "docker image ls" to see which image is still there and delete them, ex:
+docker image ls
+docker rmi dev-peer0.mainorg.docsign.com-mycc-1.0-712d857ef2a30f72816248be4a87f16f15c271ca967246fcda0eee3c1e11b15f
 
 # Create the crypto keys & network artifacts
 export FABRIC_CFG_PATH=$PWD
@@ -74,6 +67,7 @@ export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric
 docker-compose -f docker-compose-cli.yaml up
 
 # Open another terminal to enter cli
+cd cascon2018
 export FABRIC_CFG_PATH=$PWD
 docker exec -it cli bash
 
@@ -83,10 +77,17 @@ peer channel create -o orderer.docsign.com:7050 -c $CHANNEL_NAME -f ./channel-ar
 peer channel join -b signchannel.block
 peer channel update -o orderer.docsign.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/MainOrgMSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/docsign.com/orderers/orderer.docsign.com/msp/tlscacerts/tlsca.docsign.com-cert.pem
 
-# Install chaincode
+# Install chaincode (example version)
 peer chaincode install -n mycc -v 1.0 -l node -p /opt/gopath/src/github.com/chaincode/chaincode_example02/node/
 peer chaincode instantiate -o orderer.docsign.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/docsign.com/orderers/orderer.docsign.com/msp/tlscacerts/tlsca.docsign.com-cert.pem -C $CHANNEL_NAME -n mycc -l node -v 1.0 -c '{"Args":["init","a", "100", "b","200"]}' -P "AND ('MainOrgMSP.peer')"
 peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}'
+
+# Install chaincode (our chaincode) (Test version)
+peer chaincode install -n mycc -v 1.0 -l node -p /opt/gopath/src/github.com/chaincode/docsign/node/
+peer chaincode instantiate -o orderer.docsign.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/docsign.com/orderers/orderer.docsign.com/msp/tlscacerts/tlsca.docsign.com-cert.pem -C $CHANNEL_NAME -n mycc -l node -v 1.0 -c '{"Args":["Init", "a", "b", "c", "d"]}' -P "AND ('MainOrgMSP.peer')"
+peer chaincode invoke -o orderer.docsign.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/docsign.com/orderers/orderer.docsign.com/msp/tlscacerts/tlsca.docsign.com-cert.pem -C $CHANNEL_NAME -n mycc -c '{"Args":["initLedger"]}'
+peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["queryDoc","dummy doc hash and signature now"]}'
+peer chaincode invoke -o orderer.docsign.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/docsign.com/orderers/orderer.docsign.com/msp/tlscacerts/tlsca.docsign.com-cert.pem -C $CHANNEL_NAME -n mycc -c '{"Args":["createDocAndSign", "lalala"]}'
 
 # To stop the network
 ctrl+c in the first terminal running the network
@@ -97,8 +98,19 @@ docker rm -f $(docker ps -aq)
 rm -rf crypto-config
 cd channel-artifacts && rm -rf *
 cd ..
+
+# To delete the installed chaincode
+Need to enter the peer node’s container (cli) !!! - Fabric has not complete this part!
+docker rm -f <container id>
+rm /var/hyperledger/production/chaincodes/<ccname>:<ccversion>
+# If want to delete old chaincode image (for reinstalling chaincode), try "docker image ls" to see which image is still there and delete them, ex:
+docker image ls
+docker rmi dev-peer0.mainorg.docsign.com-mycc-1.0-712d857ef2a30f72816248be4a87f16f15c271ca967246fcda0eee3c1e11b15f
 ```
 
+## Old Stuff (Just for reference, don't try these)
+
+### From Sample
 
 #### Generate crypto materials
 
