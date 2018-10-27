@@ -38,9 +38,9 @@ let Chaincode = class {
     }
   }
 
-  async queryDoc(stub, args) {
+  async get(stub, args) {
     if (args.length != 1) {
-      throw new Error('Incorrect number of arguments. Expecting the combined hash&signature as the key');
+      throw new Error('Incorrect number of arguments. Expecting one key.');
     }
     let record = args[0];
 
@@ -52,35 +52,15 @@ let Chaincode = class {
     return status;  // should return true
   }
 
-  async initLedger(stub, args) {
-    // To simplify the logic, just use the combined (doc_hash + signature) as the key
-    // The key is processed in the client side and server side application
-    console.info('============= START : Initialize Ledger ===========');
-    let docs = [];
-    let docHashAndSign = 'dummy doc hash and signature now'
-    docs.push({
-      existing: 'true'
-    });
-
-    for (let i = 0; i < docs.length; i++) {
-      await stub.putState(docHashAndSign, Buffer.from(JSON.stringify(docs[i])));
-      console.info('Added <--> doc ', i);
-    }
-    console.info('============= END : Initialize Ledger ===========');
-  }
-
-  async createDocAndSign(stub, args) {
-    console.info('============= START : Create New Doc Record ===========');
-    if (args.length != 1) {
-      throw new Error('Incorrect number of arguments. Expecting a single hash&sign as the key.');
+  async put(stub, args) {
+    console.info('============= START : Create New Record ===========');
+    if (args.length != 2) {
+      throw new Error('Incorrect number of arguments. Expecting a key and a value.');
     }
 
-    var doc = {
-      existing: 'true'
-    };
-
-    await stub.putState(args[0], Buffer.from(JSON.stringify(doc)));
+    await stub.putState(args[0], Buffer.from(JSON.stringify(args[1])));
     console.info('============= END : Create New Record ===========');
   }
+
 
 shim.start(new Chaincode());
