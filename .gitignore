@@ -3,3 +3,5 @@ bin/
 fabric-samples/
 channel-artifacts/
 crypto-config/
+app/hfc-key-store/
+app/package-lock.json
