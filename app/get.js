@@ -50,7 +50,7 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 		//targets : --- letting this default to the peers assigned to the channel
 		chaincodeId: 'doccc',
 		fcn: 'get',
-		args: ['a'],
+		args: ['test_dochash'],
 	};
 	// send the query proposal to the peer
 	return channel.queryByChaincode(request);
