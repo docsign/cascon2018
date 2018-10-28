@@ -61,6 +61,6 @@ let Chaincode = class {
     await stub.putState(args[0], Buffer.from(JSON.stringify(args[1])));
     console.info('============= END : Create New Record ===========');
   }
-
+};
 
 shim.start(new Chaincode());
