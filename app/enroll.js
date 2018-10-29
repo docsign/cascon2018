@@ -39,7 +39,7 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 		username: 'User1',
                 mspid: 'MainOrgMSP',
                 cryptoContent: { 
-			privateKey: '/home/student/cascon2018/crypto-config/peerOrganizations/mainorg.docsign.com/users/User1@mainorg.docsign.com/msp/keystore/4f611a452b0449cda420b914bff1234cc41fd04e835b33ae1447fdd0c9dff948_sk', 
+			privateKey: '/home/student/cascon2018/crypto-config/peerOrganizations/mainorg.docsign.com/users/User1@mainorg.docsign.com/msp/keystore/1d472c0e1341a40cf355ee36e311e8d9122b5bf737ecbfadd088ddb00f3a68bf_sk', 
 			signedCert: '/home/student/cascon2018/crypto-config/peerOrganizations/mainorg.docsign.com/users/User1@mainorg.docsign.com/msp/signcerts/User1@mainorg.docsign.com-cert.pem'}
          }).then((user) => {
             member_user = user;
