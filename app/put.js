@@ -32,8 +32,6 @@ channel.addOrderer(order);
 var member_user = null;
 var store_path = path.join(__dirname, 'hfc-key-store');
 console.log('Store path:'+store_path);
-// var store_path = "/home/student/cascon2018/crypto-config/peerOrganizations/mainorg. \
-// docsign.com/users/User1@mainorg.docsign.com/msp/signcerts/User1@mainorg.docsign.com-cert.pem"
 var tx_id = null;
 
 // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
@@ -49,25 +47,28 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 	fabric_client.setCryptoSuite(crypto_suite);
 
 	// get the enrolled user from persistence, this user will sign all requests
-	return fabric_client.getUserContext('User1', true);
+	return fabric_client.getUserContext('user1', true);
 }).then((user_from_store) => {
 	if (user_from_store && user_from_store.isEnrolled()) {
-		console.log('Successfully loaded User1 from persistence');
+		console.log('Successfully loaded user1 from persistence');
 		member_user = user_from_store;
 	} else {
-		throw new Error('User1 is not enrolled');
+		throw new Error('Failed to get user1.... run registerUser.js');
 	}
 
 	// get a transaction id object based on the current user assigned to fabric client
 	tx_id = fabric_client.newTransactionID();
 	console.log("Assigning transaction_id: ", tx_id._transaction_id);
 
+	// createCar chaincode function - requires 5 args, ex: args: ['CAR12', 'Honda', 'Accord', 'Black', 'Tom'],
+	// changeCarOwner chaincode function - requires 2 args , ex: args: ['CAR10', 'Dave'],
+	// must send the proposal to endorsing peers
 	var request = {
 		//targets: let default to the peer assigned to the client
-		chaincodeId: 'doccc',
-		fcn: 'put',
-		args: ['a','100'],
-		chainId: 'signchannel',
+		chaincodeId: 'fabcar',
+		fcn: '',
+		args: [''],
+		chainId: 'mychannel',
 		txId: tx_id
 	};
 
@@ -106,24 +107,21 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 
 		// get an eventhub once the fabric client has a user assigned. The user
 		// is required bacause the event registration must be signed
-		let event_hub = fabric_client.newEventHub();
-		event_hub.setPeerAddr('grpcs://localhost:7053');
+		let event_hub = channel.newChannelEventHub(peer);
 
 		// using resolve the promise so that result status may be processed
 		// under the then clause rather than having the catch clause process
 		// the status
 		let txPromise = new Promise((resolve, reject) => {
 			let handle = setTimeout(() => {
+				event_hub.unregisterTxEvent(transaction_id_string);
 				event_hub.disconnect();
 				resolve({event_status : 'TIMEOUT'}); //we could use reject(new Error('Trnasaction did not complete within 30 seconds'));
 			}, 3000);
-			event_hub.connect();
 			event_hub.registerTxEvent(transaction_id_string, (tx, code) => {
 				// this is the callback for transaction event status
 				// first some clean up of event listener
 				clearTimeout(handle);
-				event_hub.unregisterTxEvent(transaction_id_string);
-				event_hub.disconnect();
 
 				// now let the application know what happened
 				var return_status = {event_status : code, tx_id : transaction_id_string};
@@ -131,13 +129,17 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 					console.error('The transaction was invalid, code = ' + code);
 					resolve(return_status); // we could use reject(new Error('Problem with the tranaction, event status ::'+code));
 				} else {
-					console.log('The transaction has been committed on peer ' + event_hub._ep._endpoint.addr);
+					console.log('The transaction has been committed on peer ' + event_hub.getPeerAddr());
 					resolve(return_status);
 				}
 			}, (err) => {
 				//this is the callback if something goes wrong with the event registration or processing
 				reject(new Error('There was a problem with the eventhub ::'+err));
-			});
+			},
+				{disconnect: true} //disconnect when complete
+			);
+			event_hub.connect();
+
 		});
 		promises.push(txPromise);
 
@@ -152,7 +154,7 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 	if (results && results[0] && results[0].status === 'SUCCESS') {
 		console.log('Successfully sent transaction to the orderer.');
 	} else {
-		console.error('Failed to order the transaction. Error code: ' + response.status);
+		console.error('Failed to order the transaction. Error code: ' + results[0].status);
 	}
 
 	if(results && results[1] && results[1].event_status === 'VALID') {
