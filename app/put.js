@@ -23,7 +23,7 @@ data = fs.readFileSync('/home/student/cascon2018/crypto-config/ordererOrganizati
 var order = fabric_client.newOrderer('grpcs://localhost:7050',
 	{
 		pem: Buffer.from(data).toString(),
-		'ssl-target-name-override': 'orderer.docsign.com/'
+		'ssl-target-name-override': 'orderer.docsign.com'
 	}
 );
 channel.addOrderer(order);
@@ -47,7 +47,7 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 	fabric_client.setCryptoSuite(crypto_suite);
 
 	// get the enrolled user from persistence, this user will sign all requests
-	return fabric_client.getUserContext('user1', true);
+	return fabric_client.getUserContext('User1', true);
 }).then((user_from_store) => {
 	if (user_from_store && user_from_store.isEnrolled()) {
 		console.log('Successfully loaded user1 from persistence');
@@ -65,10 +65,10 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 	// must send the proposal to endorsing peers
 	var request = {
 		//targets: let default to the peer assigned to the client
-		chaincodeId: 'fabcar',
-		fcn: '',
-		args: [''],
-		chainId: 'mychannel',
+		chaincodeId: 'doccc',
+		fcn: 'put',
+		args: ['a','100'],
+		chainId: 'signchannel',
 		txId: tx_id
 	};
 
@@ -102,9 +102,6 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 		var transaction_id_string = tx_id.getTransactionID(); //Get the transaction ID string to be used by the event processing
 		var promises = [];
 
-		var sendPromise = channel.sendTransaction(request);
-		promises.push(sendPromise); //we want the send transaction first, so that we know where to check status
-
 		// get an eventhub once the fabric client has a user assigned. The user
 		// is required bacause the event registration must be signed
 		let event_hub = channel.newChannelEventHub(peer);
@@ -117,7 +114,7 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 				event_hub.unregisterTxEvent(transaction_id_string);
 				event_hub.disconnect();
 				resolve({event_status : 'TIMEOUT'}); //we could use reject(new Error('Trnasaction did not complete within 30 seconds'));
-			}, 3000);
+			}, 20000);
 			event_hub.registerTxEvent(transaction_id_string, (tx, code) => {
 				// this is the callback for transaction event status
 				// first some clean up of event listener
@@ -140,7 +137,9 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 			);
 			event_hub.connect();
 
-		});
+		})
+                var sendPromise = channel.sendTransaction(request);
+                promises.push(sendPromise); //we want the send transaction first, so that we know where to check status
 		promises.push(txPromise);
 
 		return Promise.all(promises);
